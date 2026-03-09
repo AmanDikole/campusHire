@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+:root {
+  --app-bg: #f6f8fb;
+  --app-fg: #0f172a;
+}
+
+body {
+  background:
+    radial-gradient(48rem 26rem at 2% -10%, rgba(14, 165, 233, 0.08), transparent),
+    radial-gradient(34rem 22rem at 95% -5%, rgba(245, 158, 11, 0.08), transparent),
+    var(--app-bg);
+  color: var(--app-fg);
+  font-family: var(--font-body), "Segoe UI", sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.font-display {
+  font-family: var(--font-display), var(--font-body), "Segoe UI", sans-serif;
+}
+
+@layer utilities {
+  .animate-scroll {
+    animation: scroll 25s linear infinite;
+  }
+
+  .animate-blob {
+    animation: blob 7s infinite;
+  }
+
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+
+  .animation-delay-4000 {
+    animation-delay: 4s;
+  }
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes blob {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+}

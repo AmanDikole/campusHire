@@ -1,0 +1,7 @@
+-- AlterTable
+ALTER TABLE `User`
+  ADD COLUMN `emailVerified` BOOLEAN NOT NULL DEFAULT false,
+  ADD COLUMN `otpCode` VARCHAR(191) NULL,
+  ADD COLUMN `otpExpiresAt` DATETIME(3) NULL,
+  ADD COLUMN `resetToken` VARCHAR(191) NULL,
+  ADD COLUMN `resetTokenExpiresAt` DATETIME(3) NULL;

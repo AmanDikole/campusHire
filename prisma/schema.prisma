@@ -1,0 +1,275 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum PlanStatus {
+  trialing
+  active
+  past_due
+  expired
+  canceled
+}
+
+enum JobApprovalStatus {
+  pending
+  approved
+  rejected
+}
+
+enum CollegeStatus {
+  active
+  suspended
+}
+
+enum CollegeSubscriptionStatus {
+  trialing
+  pending
+  active
+  past_due
+  canceled
+  expired
+}
+
+enum CollegePaymentStatus {
+  pending
+  paid
+  failed
+  refunded
+  none
+}
+
+model College {
+  id          String   @id @default(cuid())
+  name        String
+  subdomain   String   @unique
+  location    String?
+  phone       String?
+  website     String?
+  details     String?
+  status      CollegeStatus @default(active)
+  logoUrl     String?
+  createdAt   DateTime @default(now())
+
+  users         User[]
+  jobs          Job[]
+  applications  Application[]
+  subscriptions CollegeSubscription[]
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String
+  password      String
+  role          String    @default("student")
+  createdAt     DateTime  @default(now())
+  companyName   String?
+  resetToken    String?
+  resetTokenExpiresAt DateTime?
+  planStatus    PlanStatus?
+  planStartedAt DateTime?
+  trialEndsAt   DateTime?
+  currentPeriodStart DateTime?
+  currentPeriodEnd DateTime?
+  razorpayCustomerId String?
+  razorpaySubscriptionId String? @unique
+  
+  collegeId     String
+  college       College   @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+
+  profile       Profile?
+  applications  Application[]
+  notifications Notification[]
+  postedJobs    Job[]     @relation("JobPostedBy")
+  paymentEvents PaymentEvent[]
+
+  @@unique([email, collegeId])
+}
+
+model Profile {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  fullName        String?
+  course          String?
+  branch          String?
+  currentYear     Int?
+  cgpa            Float    @default(0)
+  board10th       String?
+  percent10th     Float    @default(0)
+  board12th       String?
+  percent12th     Float    @default(0)
+  diplomaCourse   String?
+  percentDiploma  Float    @default(0)
+  gender          String   @default("Male")
+  university      String?
+  resumeUrl       String?
+  linkedinUrl     String?
+  portfolioUrl    String?
+  backlogs        Int      @default(0)
+  yearOfPassing   Int?
+  universityRollNo String?
+  currentSemester Int?
+  technicalSkills String?
+  softSkills      String?
+  certifications  String?
+  internshipExperience String?
+  resumeHeadline  String?
+  githubUrl       String?
+  codingProfileUrl String?
+  preferredLocation String?
+  verificationStatus String @default("Pending")
+  verificationComment String?
+  verificationRequestedAt DateTime?
+  verifiedAt      DateTime?
+  verifiedBy      String?
+  updatedAt       DateTime @updatedAt
+
+  projects        StudentProject[]
+}
+
+model StudentProject {
+  id          String   @id @default(cuid())
+  profileId   String
+  profile     Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  title       String
+  description String?
+  techStack   String?
+  projectUrl  String?
+  githubUrl   String?
+  startDate   DateTime?
+  endDate     DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([profileId, createdAt])
+}
+
+model Job {
+  id                String   @id @default(uuid())
+  title             String
+  company           String
+  location          String
+  salary            String
+  description       String
+  isActive          Boolean  @default(true)
+  approvalStatus    JobApprovalStatus @default(approved)
+  approvedAt        DateTime?
+  approvedBy        String?
+  approvalComment   String?
+  
+  minCgpa           Float    @default(0)
+  min10thPercent    Float    @default(0)
+  min12thPercent    Float    @default(0)
+  minDiplomaPercent Float    @default(0)
+  eligibleGender    String   @default("Any")
+  createdAt         DateTime @default(now())
+  
+  collegeId         String
+  college           College   @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  postedById        String?
+  postedBy          User?     @relation("JobPostedBy", fields: [postedById], references: [id], onDelete: SetNull)
+
+  applications      Application[]
+  eligibleBranches  EligibleBranch[]
+}
+
+model EligibleBranch {
+  id      String @id @default(uuid())
+  name    String
+
+  jobId   String
+  job     Job    @relation(fields: [jobId], references: [id], onDelete: Cascade)
+}
+
+model Application {
+  id        String   @id @default(uuid())
+  
+  collegeId String
+  college   College  @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+
+  jobId     String
+  job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  
+  studentId String
+  student   User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  
+  status    String   @default("Pending")
+  appliedAt DateTime @default(now())
+
+  @@unique([jobId, studentId])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  message   String
+  type      String   @default("info")
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model PaymentEvent {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider        String
+  providerEventId String   @unique
+  eventType       String
+  payload         Json
+  processedAt     DateTime @default(now())
+}
+
+model Plan {
+  id              String   @id @default(cuid())
+  key             String   @unique
+  name            String
+  monthlyPriceInr Int      @default(0)
+  studentLimit    Int?
+  jobLimit        Int?
+  analyticsAccess Boolean  @default(false)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  subscriptions   CollegeSubscription[]
+}
+
+model CollegeSubscription {
+  id                    String                    @id @default(cuid())
+  collegeId             String
+  college               College                   @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  planId                String
+  plan                  Plan                      @relation(fields: [planId], references: [id], onDelete: Restrict)
+  status                CollegeSubscriptionStatus @default(trialing)
+  paymentStatus         CollegePaymentStatus      @default(pending)
+  startDate             DateTime
+  endDate               DateTime?
+  trialEndsAt           DateTime?
+  razorpaySubscriptionId String?                  @unique
+  createdAt             DateTime                  @default(now())
+  updatedAt             DateTime                  @updatedAt
+
+  paymentEvents         CollegePaymentEvent[]
+
+  @@index([collegeId, status])
+  @@index([planId])
+}
+
+model CollegePaymentEvent {
+  id                     String              @id @default(cuid())
+  collegeSubscriptionId  String
+  collegeSubscription    CollegeSubscription @relation(fields: [collegeSubscriptionId], references: [id], onDelete: Cascade)
+  provider               String
+  providerEventId        String              @unique
+  eventType              String
+  payload                Json
+  processedAt            DateTime            @default(now())
+}
