@@ -10,7 +10,7 @@ export function extractTenantSubdomain(host: string | null | undefined): string 
     hostname.endsWith(".ngrok-free.dev") ||
     hostname.endsWith(".ngrok-free.app") ||
     hostname.endsWith(".ngrok.io") ||
-    hostname.endsWith(".trycloudflare.com")
+    hostname.endsWith(".vercel.app")
   ) {
     return null
   }
