@@ -1,0 +1,74 @@
+{
+    "info": {
+        "name": "CampusHire API Tests",
+        "description": "Postman Collection for testing CampusHire API endpoints including the AI Chatbot integration.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Chatbot Endpoint Testing",
+            "item": [
+                {
+                    "name": "Single Prompt Test",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\r\n  \"messages\": [\r\n    {\r\n      \"role\": \"user\",\r\n      \"content\": \"Hello, can you give me some active jobs available on this platform?\"\r\n    }\r\n  ]\r\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:3000/api/chat",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "3000",
+                            "path": [
+                                "api",
+                                "chat"
+                            ]
+                        },
+                        "description": "Tests the AI Chatbot backend by sending a prompt. Since Vercel AI SDK streams the output, this will respond with streaming chunks."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Follow-up Context Test",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\r\n  \"messages\": [\r\n    {\r\n      \"role\": \"user\",\r\n      \"content\": \"How many colleges use your platform?\"\r\n    },\r\n    {\r\n      \"role\": \"assistant\",\r\n      \"content\": \"We currently have 5 colleges registered on our platform.\"\r\n    },\r\n    {\r\n      \"role\": \"user\",\r\n      \"content\": \"And how many students are there?\"\r\n    }\r\n  ]\r\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:3000/api/chat",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "3000",
+                            "path": [
+                                "api",
+                                "chat"
+                            ]
+                        },
+                        "description": "Tests sending a continuous conversation array to the endpoint so the LLM remembers previous context."
+                    },
+                    "response": []
+                }
+            ]
+        }
+    ]
+}

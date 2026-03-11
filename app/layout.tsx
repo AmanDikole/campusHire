@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { Manrope, Space_Grotesk } from "next/font/google"
 import "./globals.css"
+import Chatbot from "@/components/Chatbot"
 
 const bodyFont = Manrope({
   subsets: ["latin"],
@@ -26,6 +27,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${bodyFont.variable} ${displayFont.variable} antialiased`} suppressHydrationWarning>
         {children}
+        <Chatbot />
       </body>
     </html>
   )
